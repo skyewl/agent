@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="format-detection" content="email=no">
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+
+  <title>三六九互娱</title>
+
+  <script>
+    //rem
+    (function (doc, win) {
+      var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+          var clientWidth = docEl.clientWidth;
+          if (!clientWidth) return;
+          if (clientWidth >= 750) {
+            docEl.style.fontSize = '100px';
+          } else {
+            docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+          }
+        };
+
+      if (!doc.addEventListener) return;
+      win.addEventListener(resizeEvt, recalc, false);
+      doc.addEventListener('DOMContentLoaded', recalc, false);
+    })(document, window);
+  </script>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/agent.css?v=20180615">
+</head>
+
+<body class="bgclo">
+  <!--推荐历史开始-->
+  <div class="contWrap" id="app" v-cloak>
+
+    <div class="headfix">
+      <div class="ageHead">
+        <div class="txtC icotit">
+          <span class="back" onclick="goBack()"><i class="iconfont ico-goback">&#xe607;</i> 返回</span>
+          <span>代理推荐（待处理）</span>
+          <a class="iconfont ico-home" href="index.html">&#xe600;</a>
+        </div>
+      </div>
+    </div>
+    <div class="topspc"></div>
+    <div class="pending-tit">
+      <span class="fl tit1">推荐人</span>
+      <span class="fl tit2">被推荐人</span>
+      <span class="fl tit3">推荐时间</span>
+    </div>
+    <div class="pending-list">
+      <ul>
+        <li class="pending-item" v-for="item in pendList">
+          <div class="info">
+            <span class="tb1">{{ item.invite_name }}<br><em class="id">{{ item.invite_id }}</em></span>
+            <span class="tb2">{{ item.name }}<br><em class="id">{{ item.agent_id }}</em></span>
+            <span class="tb3">{{ item.entry_time }}</span>
+          </div>
+          <div class="btns">
+            <div v-if="item.invite_status==='1'">
+                <button @click="openAuthPop(item.id)">拒绝</button>
+                <button class="authbtn" @click="agreeAgent(item.id)">同意</button>    
+            </div>
+            <p class="mark mark-age" v-if="item.invite_status==='2'">已同意</p>
+            <p class="mark" v-if="item.invite_status==='3'">已拒绝</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <p class="nodata">{{errmsg}}</p>
+    <!-- 拒绝弹出层 -->
+    <div class="openBox-cover" v-if="popShow" @click="colseAuthPop()"></div>
+    <div class="openBox-content" v-if="popShow">
+      <h3 class="poptit">填写拒绝理由</h3>
+      <div class="popitem popitem-text">
+        <textarea class="ipt ipt-text" rows="3" placeholder="请输入拒绝理由" v-model="reasonVal" maxlength="100"></textarea>
+      </div>
+        
+      <div class="openBox-btn">
+        <span class="popbtn" @click="colseAuthPop()">
+          取消
+        </span>
+        <span class="popbtn popbtn-sub" @click="authUser()">
+          确认
+        </span>
+      </div>
+    </div>
+    
+  </div>
+
+  <!--加载动画-->
+  <div class="loading">
+    <div class="sk-circle">
+      <div class="sk-circle1 sk-child"></div>
+      <div class="sk-circle2 sk-child"></div>
+      <div class="sk-circle3 sk-child"></div>
+      <div class="sk-circle4 sk-child"></div>
+      <div class="sk-circle5 sk-child"></div>
+      <div class="sk-circle6 sk-child"></div>
+      <div class="sk-circle7 sk-child"></div>
+      <div class="sk-circle8 sk-child"></div>
+      <div class="sk-circle9 sk-child"></div>
+      <div class="sk-circle10 sk-child"></div>
+      <div class="sk-circle11 sk-child"></div>
+      <div class="sk-circle12 sk-child"></div>
+    </div>
+  </div>
+
+  <script src="env_path/path.js"></script>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/layer_mobile/layer.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/vue.min.js"></script>
+
+  <script>
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        session: '',
+        agent_id: '',
+        sign_id: '',
+        pendList:[
+          // {
+          //   agent_id : "963438267", 
+          //   entry_time : "2018-06-14 11:13:42", 
+          //   invite_id : "507150983", 
+          //   invite_name : "吴峰", 
+          //   invite_status : "1",
+          //   name : "张三", 
+          //   reason : null, 
+          //   sign_id : "3"
+          // }
+        ],
+        page: 1,
+        showLoading: true,
+        errmsg:'',
+        flag: true,
+        popShow: false,
+        reasonVal: '',
+        authCode: ''
+      },
+      created: function(){
+        this.session = get('session');
+        this.agent_id = get('agent_id');
+        this.sign_id = get('sign_id');
+        this.getPendList();
+      },
+      mounted: function () {
+        window.addEventListener('scroll', this.handleScroll);
+      },
+      methods: {
+        getPendList: function(){
+          var self = this;
+          ajaxGet(
+            apipath + '/Api/LowerLevel/MyInviteList',
+            {
+              session: self.session,
+              agent_id: self.agent_id,
+              p: self.page
+            },
+            function(res){
+              console.log(res);
+              if (res.error === 0 && res.data) {
+                for (var i = 0; i < res.data.length; i++) {
+                  self.pendList.push(res.data[i]);
+                }
+                if( res.data.length===10){
+                  self.errmsg='上拉加载数据';
+                  self.flag = true;
+                }else{
+                  self.flag = false;
+                  if(self.page===1){
+                    self.errmsg='';
+                  }else{
+                    self.errmsg='暂无更多数据';
+                  }
+                }
+                
+              } else if(res.error === 0){
+                self.errmsg='暂无更多数据';
+                self.flag = false;
+              }else{
+                layerMsg(res.msg);
+                if(res.msg==='登录消息已过期'){
+                  goLogin();
+                }
+              }
+            },
+            function(res){
+              console.log(res);
+            }
+          )
+        },
+        handleScroll: function() {
+    　　　 //判断滚动到底部
+          if ($(window).scrollTop() >=$(document).height() - $(window).height() && this.flag) {
+            this.showLoading = true;
+            this.page++;
+            this.getRecList();
+          }
+        },
+        agreeAgent: function(id){
+          var self = this;
+          layer.open({
+            content: '确认同意此用户的申请吗？',
+            btn: ['确认', '取消'],
+            yes: function(index){
+              ajaxGet(
+                apipath + '/Api/LowerLevel/agentReview',
+                {
+                  session: self.session,
+                  agent_id: self.agent_id,
+                  invite_status: 2,
+                  id: id,
+                  reason: ''
+                },
+                function(res){
+                  //console.log(res);
+                  if(res.error === 0){
+                    layer.open({
+                      content: '处理成功！',
+                      skin: 'msg',
+                      time: 2,
+                      end: function(){
+                        location.reload();
+                      }
+                    })
+                    
+                  }else{
+                    layerMsg(res.msg)
+                    if(res.msg==='登录消息已过期'){
+                      goLogin();
+                    }
+                  }
+
+                },
+                function(res){
+                  console.log(res);
+                }
+              )
+            }
+          })
+        },
+        openAuthPop: function(code) {
+          this.popShow = !this.popShow;
+          this.authCode = code;
+        },
+        colseAuthPop: function() {
+          this.popShow = !this.popShow;
+          this.authCode = '';
+          this.reasonVal = '';
+        },
+        authUser: function(){
+          var self = this;
+          if (self.reasonVal==='') {
+            layer.open({
+              content: '请填写拒绝理由',
+              skin: 'msg',
+              time: 2
+            });
+            return;
+          }
+          ajaxGet(
+            apipath + '/Api/LowerLevel/agentReview',
+            {
+              session: self.session,
+              agent_id: self.agent_id,
+              invite_status: 3,
+              id: self.authCode,
+              reason: self.reasonVal
+            },
+            function(res){
+              //console.log(res);
+              if(res.error === 0){
+                layer.open({
+                  content: '处理成功！',
+                  skin: 'msg',
+                  time: 2,
+                  end: function(){
+                    location.reload();
+                  }
+                })
+              }else{
+                layerMsg(res.msg);
+                if(res.msg==='登录消息已过期'){
+                  goLogin();
+                }
+              }
+
+            },
+            function(res){
+              console.log(res);
+            }
+          )
+
+        }
+      }
+
+
+    })
+  </script>
+
+</body>
+
+</html>

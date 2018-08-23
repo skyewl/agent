@@ -1,0 +1,97 @@
+.bgimg{
+    background-size: cover;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+.invbg{
+    background-image: url(../img/invitbg.jpg);
+}
+.downbg{
+    background-image: url(../img/downbg.jpg);
+}
+.invcont{
+    width: 6.8rem;
+    margin: 0 auto;
+    position: absolute;
+    bottom: 1.3rem;
+    left: 50%;
+    margin-left: -3.4rem;
+}
+.invtit{
+    font-size: .4rem;
+    color: #fff;
+    text-align: center;
+    margin:  0 auto;
+}
+.invtit .clo1{
+    color: #ffd800;
+}
+.invtit .clo2{
+    color: #deff00;
+}
+.golink{
+    width: 5.28rem;
+    height: 1.38rem;
+    display: block;
+    margin: .3rem auto 0 auto;
+    background: #ffdd59;
+    color: #321ba9;
+    font-size: .5rem;
+    text-align: center;
+    line-height: 1.38rem;
+    border-radius: .2rem;
+}
+.tip{
+   margin: 0 auto;
+   color: #fefefe;
+   font-size: .24rem;
+   text-align: center;
+   padding-top: .3rem;
+}
+.kf{
+    font-size: .3rem;
+    color: #f5ff59;
+    text-align: center;
+    padding-top: .2rem;
+}
+.copyinput{
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    z-index: -10;
+}
+.copybtn{
+    width: 2rem;
+    height: .6rem;
+    background: #9738fe;
+    color: #fff;
+    display: inline-block;
+    font-size: .3rem;
+    text-align: center;
+    line-height: .6rem;
+    border-radius: 5px;
+    margin-left: .3rem;
+}
+.download-tip{
+    padding-top: .4rem;
+    text-align: center;
+    color: #f8ff36;
+    font-size: .28rem;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

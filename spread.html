@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="format-detection" content="email=no">
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+
+  <title>三六九互娱</title>
+
+  <script>
+    //rem
+    (function (doc, win) {
+      var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+          var clientWidth = docEl.clientWidth;
+          if (!clientWidth) return;
+          if (clientWidth >= 750) {
+            docEl.style.fontSize = '100px';
+          } else {
+            docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+          }
+        };
+
+      if (!doc.addEventListener) return;
+      win.addEventListener(resizeEvt, recalc, false);
+      doc.addEventListener('DOMContentLoaded', recalc, false);
+    })(document, window);
+  </script>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/agent.css?v=20180612">
+</head>
+
+<body class="bgclo">
+  <!--推广开始-->
+  <div class="contWrap" id="app" v-cloak>
+
+    <div class="headfix">
+      <div class="ageHead">
+        <div class="txtC">
+          <span>推广</span>
+        </div>
+      </div>
+    </div>
+    <div class="topspc"></div>
+
+    <div class="spreadCont">
+      <div class="spread-box">
+        <p class="inv-code">我的邀请码：{{ inviteInfoData.invitecode }}</p>
+        <div class="codebox">
+            <img :src="inviteInfoData.imgurl" alt="" width="100%">
+        </div>
+        <p class="tip">请通过长按或截图来保存二维码</p>
+        <p class="link">{{ inviteInfoData.inviteurl }}</p>
+        <!-- <p class="link"><input type="text" :value="inviteInfoData.inviteurl" readonly></p> -->
+        <textarea class="copyinput">{{ inviteInfoData.inviteurl }}</textarea>
+        <p class="btns">
+          <span @click="copyUrl">复制链接</span>
+          <span @click="download">下载二维码</span>
+        </p>
+      </div>
+      <p class="weekinv">
+        <span v-if="inviteInfoData.myweekuser==0" class="noinv">本周未邀玩家</span>
+        <a v-else href="invitedPlayers.html" class="goinv">本周的已邀玩家({{ inviteInfoData.myweekuser }}) >></a>
+      </p>
+    </div>
+
+    <div class="botspc"></div>
+    <div class="footfix">
+      <div class="ageFoot">
+        <ul class="botnav">
+          <li class="navitem">
+            <a class="navlink" href="index.html">
+              <i class="iconfont ico-nav">&#xe632;</i><br>收益
+            </a>
+          </li>
+          <li class="navitem">
+            <a class="navlink" href="junior.html">
+              <i class="iconfont ico-nav">&#xe602;</i><br>下级
+            </a>
+          </li>
+          <li class="navitem">
+            <a class="navlink navcur" href="javascript:void(0)" onclick="location.reload()">
+              <i class="iconfont ico-nav">&#xe60a;</i><br>推广
+            </a>
+          </li>
+          <li class="navitem">
+            <a class="navlink" href="personal.html">
+              <i class="iconfont ico-nav">&#xe61c;</i><br>我的
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!--加载动画-->
+  <div class="loading">
+    <div class="sk-circle">
+      <div class="sk-circle1 sk-child"></div>
+      <div class="sk-circle2 sk-child"></div>
+      <div class="sk-circle3 sk-child"></div>
+      <div class="sk-circle4 sk-child"></div>
+      <div class="sk-circle5 sk-child"></div>
+      <div class="sk-circle6 sk-child"></div>
+      <div class="sk-circle7 sk-child"></div>
+      <div class="sk-circle8 sk-child"></div>
+      <div class="sk-circle9 sk-child"></div>
+      <div class="sk-circle10 sk-child"></div>
+      <div class="sk-circle11 sk-child"></div>
+      <div class="sk-circle12 sk-child"></div>
+    </div>
+  </div>
+
+  <script src="env_path/path.js"></script>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/layer_mobile/layer.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/vue.min.js"></script>
+
+  <script>
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        session:'',
+        agent_id:'',
+        inviteInfoData:{
+          "invitecode":"",
+          "imgurl":"",
+          "inviteurl":"",
+          "myweekuser":""
+        }
+      },
+      created: function(){
+        this.session = get('session');
+        this.agent_id = get('agent_id');
+        this.getInviteInfoData();
+      },
+      mounted: function () {
+
+      },
+      methods: {
+        getInviteInfoData:function(){
+          var self = this;
+          ajaxGet(
+            apipath + '/Api/Invite/inviteInfo',
+            {
+              session: self.session,
+              agent_id: self.agent_id
+            },
+            function(res){
+              //console.log(res);
+              if(res.error === 0){
+                self.inviteInfoData = res.data;
+              }else{
+                layerMsg(res.msg);
+                if(res.msg==='登录消息已过期'){
+                  goLogin();
+                }
+              }
+
+            },
+            function(res){
+              console.log(res);
+            }
+          )
+        },
+        copyUrl: function(){
+          var input = $(".copyinput");
+          input.select(); // 选中文本
+          document.execCommand("copy"); // 执行浏览器复制命令
+          layerMsg("复制链接成功！");
+        },
+        download: function(){
+          var url = this.inviteInfoData.imgurl;
+          var a = document.createElement('a');
+          var event = new MouseEvent('click');
+          a.download = '推广二维码';
+          a.href = url;
+          a.dispatchEvent(event);
+        }
+      }
+    })
+  </script>
+
+</body>
+
+</html>

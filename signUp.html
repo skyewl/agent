@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="format-detection" content="email=no">
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>三六九互娱</title>
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+  <script>
+    //rem
+    (function (doc, win) {
+      var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+          var clientWidth = docEl.clientWidth;
+          if (!clientWidth) return;
+          if (clientWidth >= 750) {
+            docEl.style.fontSize = '100px';
+          } else {
+            docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+          }
+        };
+
+      if (!doc.addEventListener) return;
+      win.addEventListener(resizeEvt, recalc, false);
+      doc.addEventListener('DOMContentLoaded', recalc, false);
+    })(document, window);
+  </script>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/signup.css">
+</head>
+
+<body class="bgimg invbg">
+  <!--邀请-->
+  <div class="invcont" id="app" v-cloak>
+      <h1 class="invtit"></h1>
+      <div class="signban"></div>
+      <h2 class="signtit"></h2>
+      <ul class="signtype clearfix">
+        <li class="fl item" @click="selectType('1')">
+          <div class="icon" :class="{ iconbg: type === '1' }">
+            <img class="icon-img" src="img/tuiguang_icon03.png" alt="">
+          </div>
+          <p class="icontext">369麻将(全包)</p>
+        </li>
+        <li class="fl item" @click="selectType('2')">
+          <div class="icon" :class="{ iconbg: type === '2' }">
+            <img class="icon-img" src="img/tuiguang_icon04.png" alt="">
+          </div>
+          <p class="icontext">369熟人麻将</p>
+        </li>
+        <li class="fl item" @click="selectType('3')">
+          <div class="icon" :class="{ iconbg: type === '3' }">
+            <img class="icon-img" src="img/tuiguang_icon02.png" alt="">
+          </div>
+          <p class="icontext">369积分赛</p>
+        </li>
+      </ul>
+      <div class="sign-iptbox">
+        <input class="signipt" type="text" name="" id="" placeholder="请输入您的手机号或微信号" v-model="account_phone">
+        <input type="button" class="signbtn" @click="signUp">
+      </div>
+      <div class="copybox clearfix">
+        <p class="fl wx">
+          <span class="clo1">推广运营技巧咨询</span>
+          <br>
+          <span class="clo2">微信：sljmj888</span>
+          <input type="hidden" name="" id="copyinput" value="sljmj888">
+        </p>
+        <span class="fr copybtn" @click="copykf">复制</span>
+      </div>
+  </div>
+  <script src="env_path/path.js"></script>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/layer_mobile/layer.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/vue.min.js"></script>                        
+
+  <script>
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        apipath: apipath,
+        type : '2',
+        account_phone: ''
+      },
+      created: function () {
+
+      },
+      mounted: function () {
+        
+      },
+      methods: {
+        selectType: function(type){
+          this.type = type;
+        },
+        signUp: function(){
+          var self = this;
+          if (!self.account_phone) {
+            layerMsg('请输入手机号');
+            return;
+          }
+          if (!/^1\d{10}$/.test(self.account_phone)) {
+            layerMsg('请输入正确的手机号');
+            return;
+          }
+          ajaxPost(
+            apipath + '/Api/AgentApply/submit', {
+              account_phone: self.account_phone,
+              type: self.type
+            },
+            function (res) {
+              console.log(res);
+              if (res.error === 0) {
+                layerMsg(res.msg);
+              }else{
+                layerMsg(res.msg);
+              }
+            },
+            function (res) {
+              console.log(res);
+            }
+          )
+        },
+        copykf: function(){
+          var input = $("#copyinput");
+          input.select(); // 选中文本
+          document.execCommand("copy"); // 执行浏览器复制命令
+          layerMsg('复制成功！');
+        }
+      }
+    })
+    
+  </script>
+</body>
+
+</html>

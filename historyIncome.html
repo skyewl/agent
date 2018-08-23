@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="format-detection" content="email=no">
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+
+  <title>三六九互娱</title>
+
+  <script>
+    //rem
+    (function (doc, win) {
+      var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+          var clientWidth = docEl.clientWidth;
+          if (!clientWidth) return;
+          if (clientWidth >= 750) {
+            docEl.style.fontSize = '100px';
+          } else {
+            docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+          }
+        };
+
+      if (!doc.addEventListener) return;
+      win.addEventListener(resizeEvt, recalc, false);
+      doc.addEventListener('DOMContentLoaded', recalc, false);
+    })(document, window);
+  </script>
+  <link rel="stylesheet" href="css/base.css?v=20180605">
+  <link rel="stylesheet" href="css/agent.css?v=201806011">
+  <link rel="stylesheet" href="css/mobiscroll.full.min.css">
+
+</head>
+
+<body class="bgclo">
+  <!--下级开始-->
+  <div class="contWrap" id="app" v-cloak>
+
+    <div class="headfix">
+      <div class="ageHead">
+        <div class="txtC icotit">
+          <span>我的历史收入</span>
+          <a class="iconfont ico-home" href="index.html">&#xe600;</a>
+        </div>
+      </div>
+    </div>
+    <div class="topspc"></div>
+
+    <div class="income-navtabs clearfix">
+      <ul>
+        <li class="tabitem">
+            <span class="tabnav" :class="{ tabnavCur: isActive === '1' }" @click="getIncomeList('1')">汇总</span>
+        </li>
+        <li class="tabitem">
+            <span class="tabnav" :class="{ tabnavCur: isActive === '2' }" @click="getIncomeList('2')">本月</span>
+        </li>
+        <li class="tabitem">
+            <span class="tabnav" :class="{ tabnavCur: isActive === '3' }" @click="getIncomeList('3')">本年度</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="dateQuery">
+        <span class="dateSelect" :class="{seled:beginDate}" id="selectBeginDate">{{ beginDateStr }}</span>
+        <i class="line"></i>
+        <span class="dateSelect" :class="{seled:endDate}" id="selectEndDate" @click="datetip">{{ endDateStr }}</span>
+        <button class="btn query-btn" @click="getIncomeList('4')">查询</button>
+        <button class="btn reset-btn" onclick="location.reload()">重置</button>
+    </div>
+    <template v-if="nodata">
+      <p class="nodata">暂无历史收入数据</p>
+    </template>
+    <div class="incomeList" v-else>
+      <ul>
+        <!-- <li class="income-item">
+          <div class="fl date-income">
+            <p class="date">2016/08/18</p>
+            <div class="income">
+              <p>999999999</p>
+              <p class="lab">收入(元)</p>
+            </div>
+          </div>
+          <div class="fr datalist">
+            <ul>
+              <li class="data-item">
+                <p class="num">19990</p>
+                <p class="lab">新增用户</p>
+              </li>
+              <li class="data-item">
+                <p class="num">19990</p>
+                <p class="lab">金牌代理数</p>
+              </li>
+              <li class="data-item">
+                <p class="num">19990</p>
+                <p class="lab">银牌代理数</p>
+              </li>
+              <li class="data-item">
+                <p class="num">19990</p>
+                <p class="lab">代理数</p>
+              </li>
+              <li class="data-item">
+                <p class="num">19990</p>
+                <p class="lab">总用户数</p>
+              </li>
+              <li class="data-item">
+                <p class="num">19990</p>
+                <p class="lab">金币消耗</p>
+              </li>
+            </ul>
+          </div>
+        </li> -->
+        <li class="income-item" v-for="item in incomeList">
+          <ul class="datalist">
+            <li class="data-item">
+              <p class="num">{{ item.statday }}</p>
+              <p class="lab">时间</p>
+            </li>
+            <li class="data-item">
+              <p class="num income">{{ item.income }}</p>
+              <p class="lab">收入(元)</p>
+            </li>
+            <li class="data-item">
+              <p class="num">{{ item.usercount }}</p>
+              <p class="lab">新增用户</p>
+            </li>
+            <li class="data-item">
+              <p class="num">{{ item.userdeduct }}</p>
+              <p class="lab">服务费(金币)</p>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <p class="nodata">{{errmsg}}</p>
+    <!--加载动画-->
+    <div class="loading" v-show="showLoading">
+        <div class="sk-circle">
+          <div class="sk-circle1 sk-child"></div>
+          <div class="sk-circle2 sk-child"></div>
+          <div class="sk-circle3 sk-child"></div>
+          <div class="sk-circle4 sk-child"></div>
+          <div class="sk-circle5 sk-child"></div>
+          <div class="sk-circle6 sk-child"></div>
+          <div class="sk-circle7 sk-child"></div>
+          <div class="sk-circle8 sk-child"></div>
+          <div class="sk-circle9 sk-child"></div>
+          <div class="sk-circle10 sk-child"></div>
+          <div class="sk-circle11 sk-child"></div>
+          <div class="sk-circle12 sk-child"></div>
+        </div>
+      </div>
+  
+
+  </div>
+
+
+  <script src="env_path/path.js"></script>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/layer_mobile/layer.js"></script>
+  <script src="js/mobiscroll.full.min.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/vue.min.js"></script>
+
+  <script>
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        showLoading: true,
+        session: '',
+        agent_id: '',
+        sign_id: '',
+        isActive: '2',
+        page: 1,
+        mindate: '2018-06-01',
+        beginDateStr: '年-月-日',
+        beginDate: '',
+        endDateStr: '年-月-日',
+        endDate: '',
+        incomeList:[
+          // {
+          //   income: 0,
+          //   statday: "2018-06-12",
+          //   usercount: "16",
+          //   userdeduct: "0"
+          // }
+        ],
+        nodata: false,
+        errmsg: '',
+        flag: true
+      },
+      created: function(){
+        this.session = get('session');
+        this.agent_id = get('agent_id');
+        this.sign_id = get('sign_id');
+        this.getIncomeList('2');
+      },
+      mounted: function () {
+        //选择日期时间
+        var self = this;
+        var curDate = new Date();
+        var maxYear = curDate.getFullYear(),
+          maxMonth = curDate.getMonth(),
+          maxDate = curDate.getDate();
+        $('#selectBeginDate').mobiscroll().date({
+          theme: "android-ics light",
+          lang: 'zh',
+          cancelText: null,
+          display: 'bottom',
+          minDate: new Date(self.mindate),
+          maxDate: new Date(maxYear, maxMonth, maxDate),
+          dateFormat: 'yyyy-mm-dd',
+          onSelect: function (valueText, inst) {
+            self.beginDateStr = valueText;
+            self.beginDate = valueText;
+            $('#selectEndDate').mobiscroll().date({
+              theme: "android-ics light",
+              lang: 'zh',
+              cancelText: null,
+              display: 'bottom',
+              minDate: new Date(self.beginDateStr),
+              maxDate: new Date(maxYear, maxMonth, maxDate),
+              dateFormat: 'yyyy-mm-dd',
+              onSelect: function (valueText, inst) {
+                self.endDateStr = valueText;
+                self.endDate = valueText;
+              }
+            });
+          }
+        });
+        window.addEventListener('scroll', this.handleScroll);
+      },
+      methods: {
+        datetip: function(){
+          if( !this.beginDate){
+            layerMsg('请先选择开始日期！')
+          }
+        },
+        getIncomeList: function(type){
+          var self = this;
+          self.isActive = type;
+          self.page = 1;
+          if(type==='4'){
+            if( !self.beginDate ){
+              layerMsg('请先选择开始日期！');
+              return;
+            }
+            if( !self.endDate ){
+              layerMsg('请选择结束日期！');
+              return;
+            }
+          }
+          ajaxGet(
+            apipath + '/Api/MyIncome/IncomeList',
+            {
+              session: self.session,
+              agent_id: self.agent_id,
+              start_day: self.beginDate,
+              end_day: self.endDate,
+              p: self.page,
+              type: self.isActive
+            },
+            function(res){
+              //console.log(res);
+              if(res.error === 0 && res.data){
+                self.nodata = false;
+                self.incomeList = res.data;
+                if( res.data.length===10){
+                  self.errmsg='上拉加载更多数据';
+                  self.flag = true;
+                }else{
+                  self.errmsg='';
+                  self.flag = false;
+                }
+                
+              }else if (res.error === 0){
+                self.nodata = true;
+                self.flag = false;
+                self.errmsg='';
+              }else{
+                layerMsg( res.msg );
+                if(res.msg==='登录消息已过期'){
+                  goLogin();
+                }
+              }
+
+            },
+            function(res){
+              console.log(res);
+            }
+          )
+        },
+        getMoreIncomeList: function(){
+          var self = this;
+          ajaxGet(
+            apipath + '/Api/MyIncome/IncomeList',
+            {
+              session: self.session,
+              agent_id: self.agent_id,
+              start_day: self.beginDate,
+              end_day: self.endDate,
+              p: self.page,
+              type: self.isActive
+            },
+            function(res){
+              //console.log(res);
+              if(res.error === 0 && res.data){
+                for (var i = 0; i < res.data.length; i++) {
+                  self.incomeList.push(res.data[i]);
+                }
+                if( res.data.length===10){
+                  self.errmsg='上拉加载更多数据';
+                }
+                self.nodata = false;
+              }else if (res.error === 0){
+                self.flag = false;
+                self.errmsg='暂无更多数据';
+              }else{
+                layerMsg( res.msg );
+                if(res.msg==='登录消息已过期'){
+                  goLogin();
+                }
+              }
+
+            },
+            function(res){
+              console.log(res);
+            }
+          )
+         
+        },
+        handleScroll() {
+    　　　 //判断滚动到底部
+          if ($(window).scrollTop() >=$(document).height() - $(window).height() && this.flag) {
+            this.showLoading = true;
+            this.page++;
+            this.getMoreIncomeList( this.isActive );
+          }
+        }
+      }
+    })
+
+
+
+
+  </script>
+
+</body>
+
+</html>

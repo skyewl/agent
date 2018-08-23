@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="format-detection" content="email=no">
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+
+  <title>三六九互娱</title>
+
+  <script>
+    //rem
+    (function (doc, win) {
+      var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+          var clientWidth = docEl.clientWidth;
+          if (!clientWidth) return;
+          if (clientWidth >= 750) {
+            docEl.style.fontSize = '100px';
+          } else {
+            docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+          }
+        };
+
+      if (!doc.addEventListener) return;
+      win.addEventListener(resizeEvt, recalc, false);
+      doc.addEventListener('DOMContentLoaded', recalc, false);
+    })(document, window);
+  </script>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/agent.css?v=20180620">
+</head>
+
+<body class="bgclo">
+  <!--下级开始-->
+  <div class="contWrap" id="app" v-cloak>
+
+    <div class="headfix">
+      <div class="ageHead">
+        <div class="txtC icotit">
+          <span class="back" onclick="goBack()"><i class="iconfont ico-goback">&#xe607;</i> 返回</span>
+          <span>推荐平级代理</span>
+          <a class="iconfont ico-home" href="index.html">&#xe600;</a>
+        </div>
+      </div>
+    </div>
+    <div class="topspc"></div>
+    <div class="recommend-tit">
+      <span class="fl">被推荐人</span>
+      <span class="fl">推荐时间</span>
+      <span class="fl">级别</span>
+      <span class="fl">状态</span>
+    </div>
+    <div class="recommend-list">
+      <ul>
+        <li class="recommend-item" v-for="item in recList">
+          <div class="info">
+            <span>{{ item.name }}<br><em class="id">{{ item.agent_id }}</em></span>
+            <span>{{ item.entry_time }}</span>
+            <span v-if="item.sign_id==='1'">介绍人</span>
+            <span v-if="item.sign_id==='3'">银牌代理</span>
+            <span v-if="item.invite_status==='1'" class="pen">待处理</span>
+            <span v-if="item.invite_status==='2'" class="aut">已通过</span>
+            <span v-if="item.invite_status==='3'" class="ref" @click="refMsg(item.reason)">已拒绝 <i class="iconfont ico-tip">&#xe605;</i></span>
+          </div>
+          <div class="btns">
+            <a class="checkDet" :href=" 'juniorDetails.html?agent_id=' + item.agent_id ">查看详情</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <p class="nodata">{{errmsg}}</p>
+    <!--加载动画-->
+    <div class="loading" v-show="showLoading">
+      <div class="sk-circle">
+        <div class="sk-circle1 sk-child"></div>
+        <div class="sk-circle2 sk-child"></div>
+        <div class="sk-circle3 sk-child"></div>
+        <div class="sk-circle4 sk-child"></div>
+        <div class="sk-circle5 sk-child"></div>
+        <div class="sk-circle6 sk-child"></div>
+        <div class="sk-circle7 sk-child"></div>
+        <div class="sk-circle8 sk-child"></div>
+        <div class="sk-circle9 sk-child"></div>
+        <div class="sk-circle10 sk-child"></div>
+        <div class="sk-circle11 sk-child"></div>
+        <div class="sk-circle12 sk-child"></div>
+      </div>
+    </div>
+    <div class="botspc"></div>
+    
+  </div>
+
+  <script src="env_path/path.js"></script>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/layer_mobile/layer.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/vue.min.js"></script>
+
+  <script>
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        session: '',
+        agent_id: '',
+        sign_id: '',
+        recList:[
+          // {
+          //   agent_id : "919214958", 
+          //   entry_time : "2018-06-14 11:55:01", 
+          //   invite_status : "1", 
+          //   name : "凶残的", 
+          //   reason : null, 
+          //   sign_id : "3"
+          // }
+        ],
+        page: 1,
+        showLoading: true,
+        errmsg:'',
+        flag: true
+      },
+      created: function(){
+        this.session = get('session');
+        this.agent_id = get('agent_id');
+        this.sign_id = get('sign_id');
+        this.getRecList();
+      },
+      mounted: function () {
+        window.addEventListener('scroll', this.handleScroll);
+      },
+      methods: {
+        getRecList: function(){
+          var self = this;
+          ajaxGet(
+            apipath + '/Api/LowerLevel/MyInviteListHistoty',
+            {
+              session: self.session,
+              agent_id: self.agent_id,
+              p: self.page
+            },
+            function(res){
+              console.log(res);
+              if (res.error === 0 && res.data) {
+                for (var i = 0; i < res.data.length; i++) {
+                  self.recList.push(res.data[i]);
+                }
+                if( res.data.length===10){
+                  self.errmsg='上拉加载数据';
+                  self.flag = true;
+                }else{
+                  self.flag = false;
+                  if(self.page===1){
+                    self.errmsg='';
+                  }else{
+                    self.errmsg='暂无更多数据';
+                  }
+                }
+                
+              } else if(res.error === 0){
+                self.errmsg='暂无更多数据';
+                self.flag = false;
+              }else{
+                layerMsg(res.msg);
+                if(res.msg==='登录消息已过期'){
+                  goLogin();
+                }
+              }
+            },
+            function(res){
+              console.log(res);
+            }
+          )
+        },
+        handleScroll: function() {
+    　　　 //判断滚动到底部
+          if ($(window).scrollTop() >=$(document).height() - $(window).height() && this.flag) {
+            this.showLoading = true;
+            this.page++;
+            this.getRecList();
+          }
+        },
+        refMsg: function(msg){
+          layer.open({
+            content: msg
+            ,btn: '我知道了'
+          });
+        }
+      }
+    })
+  </script>
+
+</body>
+
+</html>

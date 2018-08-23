@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="format-detection" content="email=no">
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+  
+  <title>三六九互娱</title>
+
+  <script>
+    //rem
+    (function (doc, win) {
+      var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+          var clientWidth = docEl.clientWidth;
+          if (!clientWidth) return;
+          if (clientWidth >= 750) {
+            docEl.style.fontSize = '100px';
+          } else {
+            docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+          }
+        };
+
+      if (!doc.addEventListener) return;
+      win.addEventListener(resizeEvt, recalc, false);
+      doc.addEventListener('DOMContentLoaded', recalc, false);
+    })(document, window);
+  </script>
+  <link rel="stylesheet" href="css/base.css?v=20180606">
+  <link rel="stylesheet" href="css/agent.css?v=20180606">
+</head>
+
+<body class="bgclo">
+  <!--商城开始-->
+  <div class="contWrap" id="app" v-cloak>
+
+    <div class="headfix">
+      <div class="ageHead">
+        <div class="txtC icotit">
+          <span>金币商城</span>
+          <a class="iconfont ico-home" href="index.html">&#xe600;</a>
+        </div>
+      </div>
+    </div>
+    <div class="topspc"></div>
+
+    <div class="juniorTop">
+      <a class="fl pending" href="stockHistory.html">进货历史 ></a>
+    </div>
+    <div class="goldList">
+      <ul>
+        <li class="gold-item" v-for="item in goldList">
+          <div class="fl">
+            <em class="goldnum">{{ item.name }}</em>
+            <!-- <span>个金币</span> -->
+          </div>
+          <div class="fr">
+            <em class="moneynum">￥{{ item.price }}</em>
+            <a class="buybtn" :href="item.url">购买</a>
+          </div>
+        </li>
+        <!-- <li class="gold-item">
+          <div class="fl">
+            <em class="goldnum">9999</em>
+            <span>个金币</span>
+          </div>
+          <div class="fr">
+            <em class="moneynum">￥999.00</em>
+            <a class="buybtn" href="">购买</a>
+          </div>
+        </li> -->
+      </ul>
+    </div>
+
+    
+  </div>
+
+  <!--加载动画-->
+  <div class="loading">
+    <div class="sk-circle">
+      <div class="sk-circle1 sk-child"></div>
+      <div class="sk-circle2 sk-child"></div>
+      <div class="sk-circle3 sk-child"></div>
+      <div class="sk-circle4 sk-child"></div>
+      <div class="sk-circle5 sk-child"></div>
+      <div class="sk-circle6 sk-child"></div>
+      <div class="sk-circle7 sk-child"></div>
+      <div class="sk-circle8 sk-child"></div>
+      <div class="sk-circle9 sk-child"></div>
+      <div class="sk-circle10 sk-child"></div>
+      <div class="sk-circle11 sk-child"></div>
+      <div class="sk-circle12 sk-child"></div>
+    </div>
+  </div>
+  
+  <script src="env_path/path.js"></script>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/layer_mobile/layer.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/vue.min.js"></script>                        
+
+  <script>
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        session: '',
+        agent_id: '',
+        sign_id: '',
+        goldList:[
+          {
+            "name":"",
+            "description":"",
+            "price":"",
+            "money":"",
+            "present_money":"",
+            "discount":""
+          }
+        ]
+      },
+      created: function(){
+        this.session = get('session');
+        this.agent_id = get('agent_id');
+        this.sign_id = get('sign_id');
+        this.getGoldList();
+      },
+      mounted: function () {
+        
+      },
+      methods: {
+        getGoldList:function(){
+          var self = this;
+          ajaxGet(
+            apipath + '/Api/Shop/shoplist',
+            {
+              session: self.session,
+              agent_id: self.agent_id
+            },
+            function(res){
+              //console.log(res);
+              if (res.error === 0) {
+                self.goldList = res.data;
+              }else{
+                layerMsg(res.msg);
+                if(res.msg==='登录消息已过期'){
+                  goLogin();
+                }
+              }
+            },
+            function(res){
+              console.log(res);
+            }
+          )
+          
+        }
+      }
+    })
+  </script>
+
+</body>
+
+</html>

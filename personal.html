@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="format-detection" content="email=no">
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+  
+  <title>三六九互娱</title>
+
+  <script>
+    //rem
+    (function (doc, win) {
+      var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+          var clientWidth = docEl.clientWidth;
+          if (!clientWidth) return;
+          if (clientWidth >= 750) {
+            docEl.style.fontSize = '100px';
+          } else {
+            docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+          }
+        };
+
+      if (!doc.addEventListener) return;
+      win.addEventListener(resizeEvt, recalc, false);
+      doc.addEventListener('DOMContentLoaded', recalc, false);
+    })(document, window);
+  </script>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/agent.css?v=20180612">
+</head>
+
+<body class="bgclo">
+  <!--个人中心开始-->
+  <div class="contWrap" id="app" v-cloak>
+
+    <div class="headfix">
+      <div class="ageHead">
+        <div class="txtC">
+          <span>个人中心</span>
+        </div>
+      </div>
+    </div>
+    <div class="topspc"></div>
+
+    <div class="personal-cont">
+      <ul class="perlist">
+        <li class="peritem item-tit">
+          <i class="vertical fl"></i>
+          基本信息
+        </li>
+        <li class="peritem">
+          <span class="fl tag">姓名：{{ personalData.name }}</span>
+          <span class="fr des time">加入时间：{{personalData.modify_time}}</span>
+        </li>
+        <li class="peritem">
+          <span class="fl tag">代理ID</span>
+          <span class="fr des">{{ personalData.agent_id }}</span>
+        </li>
+        <li class="peritem" v-if="personalData.falg === 0">
+          <span class="fl tag">实名认证，方可提现</span>
+          <a class="fr des goAuth" href="javascript:void(0);"  @click="goRealAuth">去认证 ></a>
+        </li>
+        <li class="peritem" v-if="personalData.falg === 1">
+          <span class="fl tag">实名认证信息</span>
+          <a class="fr des goAuth" :href="apipath + '/Home/Public/realnameinfo'">去查看 ></a>
+        </li>
+        <!-- <li class="peritem">
+          <span class="fl tag">绑定游戏ID</span>
+          <a class="fr des goBind" href="">去绑定 ></a>
+        </li> -->
+      </ul>
+      <ul class="perlist perlist-mt">
+        <li class="peritem item-tit">
+          <i class="vertical fl"></i>
+          业务管理
+        </li>
+        <li class="peritem">
+          <span class="fl tag">我的金币</span>
+          <span class="fr des">{{ personalData.money }}金币</span>
+        </li>
+      </ul>
+      <ul class="perlist perlist-mt">
+        <li class="peritem item-tit">
+          <i class="vertical fl"></i>
+          账户设置
+        </li>
+        <li class="peritem">
+          <span class="fl tag">密码修改</span>
+          <a class="fr des goBind" :href=" apipath+ '/Home/Public/resetPassword'">去修改 ></a>
+        </li>
+      </ul>
+
+      <div class="signout" @click="signOut">退出</div>
+
+    </div>
+
+    <div class="botspc"></div>
+    <div class="footfix">
+      <div class="ageFoot">
+        <ul class="botnav">
+          <li class="navitem">
+            <a class="navlink" href="index.html">
+              <i class="iconfont ico-nav">&#xe632;</i><br>收益
+            </a>
+          </li>
+          <li class="navitem">
+            <a class="navlink" href="junior.html">
+              <i class="iconfont ico-nav">&#xe602;</i><br>下级
+            </a>
+          </li>
+          <li class="navitem">
+            <a class="navlink" href="spread.html">
+              <i class="iconfont ico-nav">&#xe60a;</i><br>推广
+            </a>
+          </li>
+          <li class="navitem">
+            <a class="navlink navcur" href="javascript:void(0)" onclick="location.reload()">
+              <i class="iconfont ico-nav">&#xe61c;</i><br>我的
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!--加载动画-->
+  <div class="loading">
+    <div class="sk-circle">
+      <div class="sk-circle1 sk-child"></div>
+      <div class="sk-circle2 sk-child"></div>
+      <div class="sk-circle3 sk-child"></div>
+      <div class="sk-circle4 sk-child"></div>
+      <div class="sk-circle5 sk-child"></div>
+      <div class="sk-circle6 sk-child"></div>
+      <div class="sk-circle7 sk-child"></div>
+      <div class="sk-circle8 sk-child"></div>
+      <div class="sk-circle9 sk-child"></div>
+      <div class="sk-circle10 sk-child"></div>
+      <div class="sk-circle11 sk-child"></div>
+      <div class="sk-circle12 sk-child"></div>
+    </div>
+  </div>
+  
+  <script src="env_path/path.js"></script>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/layer_mobile/layer.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/vue.min.js"></script>                        
+
+  <script>
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        apipath: apipath,
+        session: '',
+        agent_id: '',
+        sign_id: '',
+        personalData:{
+          "agent_id":"",
+          "bank_card":"",
+          "falg":"",
+          "id_card":"",
+          "modify_time":"",
+          "money":"",
+          "name":"",
+          "sign_id":"",
+          "status":""
+        }
+      },
+      created: function(){
+        this.session = get('session');
+        this.agent_id = get('agent_id');
+        this.sign_id = get('sign_id');
+        this.getPersonalData();
+      },
+      mounted: function () {
+        
+      },
+      methods: {
+        getPersonalData: function(){
+          var self = this;
+          ajaxGet(
+            apipath + '/Api/AgentInfo/mycenter',
+            {
+              session: self.session,
+              agent_id: self.agent_id
+            },
+            function(res){
+              //console.log(res);
+              if (res.error === 0) {
+                self.personalData = res.data;
+              }else{
+                layerMsg(res.msg);
+                if(res.msg==='登录消息已过期'){
+                  goLogin();
+                }
+              }
+            },
+            function(res){
+              console.log(res);
+              
+              if(res.status === 404){
+              // layer.open({
+              //   content: '接口异常',
+              //   btn: '确定',
+              //   yes: function(){
+              //     window.location.reload();
+              //   }
+              // });
+              }
+            }
+          )
+        },
+        signOut: function(){
+          var self = this;
+          layer.open({
+            className : 'layer-logout',
+            title: '注意',
+            content: '你确定要退出吗？',
+            btn: [ '暂时不退出了', '朕要退朝'],
+            no: function(index){
+              ajaxGet(
+                apipath + '/Api/Login/logout',
+                {},
+                function(res){
+                  console.log(res);
+                  if(res.error === 0){
+                    remove('session');
+                    remove('agent_id');
+                    remove('sign_id');
+                    goLogin();
+                  }else{
+                    layerMsg(res.msg);
+                  }
+                  
+                },
+                function(res){
+                  console.log(res);
+                  
+                }
+              )
+            }
+          });
+          
+        },
+        goRealAuth: function(){
+          layer.open({
+            className : 'layer-logout',
+            title: '重要提示 <i class="iconfont ico-close" onclick="layerClose()">&#xe620;</i>',
+            content: '<p style="text-align: left;">实名认证时，请如实填写信息，一经填写，不可修改</p><p style="text-align: left;">若因虚假信息造成的提现失败，由用户自行承担相关责任<p>',
+            btn: '好的，我知道了',
+            yes: function(){
+              window.location.href = apipath + '/Home/Public/realname';
+            }
+          });
+        }
+      }
+    })
+    // 关闭弹窗
+    function layerClose(){
+      layer.closeAll();
+    }
+  </script>
+
+</body>
+
+</html>

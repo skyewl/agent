@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+  />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="format-detection" content="email=no">
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+  <title>三六九互娱</title>
+
+  <script>
+    //rem
+    (function (doc, win) {
+      var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+          var clientWidth = docEl.clientWidth;
+          if (!clientWidth) return;
+          if (clientWidth >= 750) {
+            docEl.style.fontSize = '100px';
+          } else {
+            docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+          }
+        };
+
+      if (!doc.addEventListener) return;
+      win.addEventListener(resizeEvt, recalc, false);
+      doc.addEventListener('DOMContentLoaded', recalc, false);
+    })(document, window);
+  </script>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/agent.css?v=20180612">
+</head>
+
+<body class="loginbg">
+  <!--登录开始-->
+  <div class="contWrap loginpt" id="app" v-cloak>
+    <div class="loginlogo"></div>
+    <div class="sigma-content">
+      <div class="sigma-middle-line">
+        <span class="sigma-line-text">代理系统</span>
+      </div>
+    </div>
+    <div class="loginFrom">
+      <div class="login-item user">
+        <i class="iconfont login-icon">&#xe606;</i>
+        <input class="user-name" placeholder="请输入登录手机号" v-model="loginFrom.pho">
+      </div>
+      <div class="login-item pwd">
+        <span class="iconfont login-icon">&#xe699;</span>
+        <input class="pwd-code" :type="pwdType" placeholder="请输入密码" v-model="loginFrom.pwd" @keyup.enter="loginSub">
+        <i v-if="pwdType==='password'" class="iconfont pwd-icon" @click="changePwdType">&#xe6f8;</i>
+        <i v-else class="iconfont pwd-icon" @click="changePwdType">&#xe601;</i>
+      </div>
+      <div class="operation clearfix">
+        <a :href=" apipath + '/Agent/Index/forgetPw' " class="f-pwd">忘记密码？</a>
+        <!-- <a href="javascript:;" class="f-register">还不是馆长？</a> -->
+      </div>
+      <div class="btn-circle">
+        <button class="btn-sub" @click="loginSub">登录</button>
+      </div>
+    </div>
+    <div class="customer-box clearfix">
+      <div class="fr">
+        <a href="https://www.sobot.com/chat/pc/index.html?sysNum=fa11bd9830d14413bd541f3a1c3b402d" class="iconfont cus-icon">&#xe611;</a>
+        <span class="cus-txt">客服</span>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!--加载动画-->
+  <div class="loading">
+    <div class="sk-circle">
+      <div class="sk-circle1 sk-child"></div>
+      <div class="sk-circle2 sk-child"></div>
+      <div class="sk-circle3 sk-child"></div>
+      <div class="sk-circle4 sk-child"></div>
+      <div class="sk-circle5 sk-child"></div>
+      <div class="sk-circle6 sk-child"></div>
+      <div class="sk-circle7 sk-child"></div>
+      <div class="sk-circle8 sk-child"></div>
+      <div class="sk-circle9 sk-child"></div>
+      <div class="sk-circle10 sk-child"></div>
+      <div class="sk-circle11 sk-child"></div>
+      <div class="sk-circle12 sk-child"></div>
+    </div>
+  </div>
+
+  <script src="env_path/path.js"></script>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/layer_mobile/layer.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/vue.min.js"></script>
+
+  <script>
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        apipath: apipath,
+        pwdType : 'password',
+        loginFrom: {
+          'pho': '',
+          'pwd': ''
+        }
+      },
+      mounted: function () {
+        
+      },
+      methods: {
+        changePwdType: function(){
+          var self = this;
+          if(self.pwdType === 'password'){
+            self.pwdType = 'text';
+          }else{
+            self.pwdType= 'password';
+          }
+        },
+        loginSub: function () {
+          
+          var self = this;
+          if (!self.loginFrom.pho) {
+            layer.open({
+              content: '请输入登录手机号',
+              skin: 'msg',
+              time: 2
+            });
+            return;
+          }
+          if (!/^1\d{10}$/.test(self.loginFrom.pho)) {
+            layer.open({
+              content: '请输入正确的登录手机号',
+              skin: 'msg',
+              time: 2
+            });
+            return;
+          }
+          if (!self.loginFrom.pwd) {
+            layer.open({
+              content: '请输入密码',
+              skin: 'msg',
+              time: 2
+            });
+            return;
+          }
+          ajaxPost(
+            apipath + '/Api/Login/login', {
+              account_phone: self.loginFrom.pho,
+              password: self.loginFrom.pwd
+            },
+            function (res) {
+              //console.log(res);
+              if (res.error === 0) {
+                
+                if(res.data.status == 2){
+                  set('session', res.data.session);
+                  set('agent_id', res.data.agent_id);
+                  set('sign_id', res.data.sign_id);
+                  if(res.data.sign_id == 4){
+                    ajaxGet(
+                      apipath + '/Api/Upgrade/checkAgent',
+                      {
+                        session: res.data.session,
+                        agent_id: res.data.agent_id
+                      },
+                      function(dat){
+                        // console.log(dat);
+                        if (dat.error === 0) {
+                          if(dat.data.is_achieve ==1){
+                            layer.open({
+                              title: dat.data.popnotic.title,
+                              content: dat.data.popnotic.content,
+                              btn: '重新登录',
+                              yes: function(){
+                                location.reload();
+                              }
+                            });
+                          }else{
+                            window.location.href="index.html";
+                          }
+                        }else{
+                          layerMsg(dat.msg);
+                        }
+                      },
+                      function(res){
+                        console.log(res);
+                      }
+                    )
+                  }else{
+                    window.location.href="index.html";
+                  }
+
+                  
+                }else if(res.data.status == 3){
+                  layer.open({
+                    content: '账号未激活，请重置密码激活账号',
+                    btn: '确定',
+                    yes: function(){
+                      window.location.href = apipath + '/Home/Index/changePassword/id/' + res.data.agent_id;
+                    }
+                  });
+                }else{
+                  layerMsg(res.msg);
+                }
+              }else{
+                layerMsg(res.msg);
+              }
+            },
+            function (res) {
+              console.log(res);
+            }
+          )
+        }
+      }
+    })
+  </script>
+
+</body>
+
+</html>

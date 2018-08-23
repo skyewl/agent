@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="format-detection" content="email=no">
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+
+  <title>三六九互娱</title>
+
+  <script>
+    //rem
+    (function (doc, win) {
+      var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+          var clientWidth = docEl.clientWidth;
+          if (!clientWidth) return;
+          if (clientWidth >= 750) {
+            docEl.style.fontSize = '100px';
+          } else {
+            docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+          }
+        };
+
+      if (!doc.addEventListener) return;
+      win.addEventListener(resizeEvt, recalc, false);
+      doc.addEventListener('DOMContentLoaded', recalc, false);
+    })(document, window);
+  </script>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/agent.css?v=20180626">
+</head>
+
+<body class="bgclo">
+  <!--首页开始-->
+  <div class="contWrap" id="app" v-cloak>
+
+    <div class="headfix">
+      <div class="ageHead">
+        <div class="fl hometit">
+          <span v-if="sign_id==1">介绍人</span>
+          <span v-if="sign_id==2">金牌代理</span>
+          <span v-if="sign_id==3">银牌代理</span>
+          <span v-if="sign_id==4">代理</span>
+          <span class="hometit-s">管理系统</span>
+        </div>
+        <div class="fr msg">
+            <a class="iconfont msgicon" :href="apipath+'/Home/Public/message'">&#xe67d;</a>
+            <i class="circle" v-if="noreadcount!==0"></i>
+        </div>
+      </div>
+    </div>
+    <div class="topspc"></div>
+
+    <template v-if="noticlist.length!==0">
+      <div class="topNotice">
+        <h6 class="fl notice-tit"><i class="iconfont ico-notice">&#xe604;</i> 公告：</h6>
+        <ul class="fl notice-list">
+          <li v-for="item in noticlist"><a :href="apipath+'/Home/Public/mesInfo/id/'+item.id" >{{ item.title }}</a></li>
+        </ul>    
+      </div>
+    </template>
+
+    <div class="homeCont">
+        <div class="fun-area">
+          <ul>
+            <li class="area-item">
+              <a class="area-btn" href="goldMall.html">进 货</a>
+              
+            </li>
+            <li class="area-item">
+              <a class="area-btn" :href=" apipath + '/Home/Public/withdrawals' ">提 现</a>
+            </li>
+          </ul>
+        </div>
+        <div class="acc-data">
+          <p class="cum-income clearfix">
+            <span class="fl">累计收入：¥ {{ homeData.allmoney }}</span>
+            <span class="fr">累计进货：{{ homeData.shopmoney }}金币</span>
+          </p>
+          <p class="cash">
+              可提现：
+              <em class="rmb">¥</em>
+              <span class="cash-num">{{ homeData.availablemoney }}</span>
+          </p>
+          <p class="thisMonth">本月收入（元）：{{ homeData.mouthmoney }}</p>
+        </div>
+        <div class="today-data">
+          <p class="clearfix today-top">
+            <span class="fl today-date">
+              <i class="iconfont ico-date">&#xe608;</i>
+              今日({{ curdate }})
+            </span>
+            <span class="fr today-income">今日收入：¥{{ homeData.daymoney}}</span>
+          </p>
+          <ul class="data-tab">
+            <li class="tab-item">
+              <a href="newUsers.html" class="newuser">
+                <p class="main">
+                  <span class="lab">新增用户数：</span>
+                  <span class="num">{{ homeData.mytodayuser }}</span>
+                </p>
+              </a>
+              <p class="notes">今日自己及下级的新增</p>
+            </li>
+            <li class="tab-item" v-if="sign_id==1">
+              <p class="main-h">
+                <span class="lab">金牌代理数：</span>
+                <span class="num">{{ homeData.agentacount }}</span>
+              </p>
+            </li>
+            <li class="tab-item" v-if="sign_id==1 || sign_id==2">
+              <p class="main-h">
+                <span class="lab">银牌代理数：</span>
+                <span class="num">{{ homeData.agentbcount }}</span>
+              </p>
+            </li>
+            <li class="tab-item" v-if="sign_id==1 || sign_id==2 || sign_id==3">
+              <p class="main-h">
+              <span class="lab">代理数：</span>
+              <span class="num">{{ homeData.agentccount }}</span>
+              </p>
+            </li>
+            <li class="tab-item">
+              <p class="main">
+                <span class="lab">总用户数：</span>
+                <span class="num">{{ homeData.myalluser }}</span>
+              </p>
+              <p class="notes">自己及下级邀请的所有玩家</p>
+            </li>
+            <li class="tab-item">
+              <p class="main">
+                <span class="lab">今日服务费：</span>
+                <span class="num">{{ homeData.todayusemoney }}</span>
+              </p>
+              <p class="notes">所有用户贡献的按级返佣金币</p>
+            </li>
+          </ul>
+        </div>
+        <div class="his-income">
+          <a class="his-btn" href="historyIncome.html">我的历史收入</a>
+        </div>
+    </div>
+
+    <div class="botspc"></div>
+    <div class="footfix">
+      <div class="ageFoot">
+        <ul class="botnav">
+          <li class="navitem">
+            <a class="navlink navcur" href="javascript:void(0)" onclick="location.reload()">
+              <i class="iconfont ico-nav">&#xe632;</i><br>收益
+            </a>
+          </li>
+          <li class="navitem">
+            <a class="navlink" href="junior.html">
+              <i class="iconfont ico-nav">&#xe602;</i><br>下级
+            </a>
+          </li>
+          <li class="navitem">
+            <a class="navlink" href="spread.html">
+              <i class="iconfont ico-nav">&#xe60a;</i><br>推广
+            </a>
+          </li>
+          <li class="navitem">
+            <a class="navlink" href="personal.html">
+              <i class="iconfont ico-nav">&#xe61c;</i><br>我的
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!--加载动画-->
+  <div class="loading">
+    <div class="sk-circle">
+      <div class="sk-circle1 sk-child"></div>
+      <div class="sk-circle2 sk-child"></div>
+      <div class="sk-circle3 sk-child"></div>
+      <div class="sk-circle4 sk-child"></div>
+      <div class="sk-circle5 sk-child"></div>
+      <div class="sk-circle6 sk-child"></div>
+      <div class="sk-circle7 sk-child"></div>
+      <div class="sk-circle8 sk-child"></div>
+      <div class="sk-circle9 sk-child"></div>
+      <div class="sk-circle10 sk-child"></div>
+      <div class="sk-circle11 sk-child"></div>
+      <div class="sk-circle12 sk-child"></div>
+    </div>
+  </div>
+
+  <script src="env_path/path.js"></script>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/layer_mobile/layer.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/vue.min.js"></script>
+
+  <script>
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        apipath: apipath,
+        session : '',
+        agent_id: '',
+        sign_id: '',
+        curdate: '',
+        noreadcount: 0,
+        noticlist:[
+          // {
+          //   id: "",
+          //   title: "",
+          //   content: "",
+          //   entry_time: ""
+          // }
+        ],
+        poplist:[
+          // {
+          //   id:	"",
+          //   title:	"",
+          //   redirect_url:	"",
+          //   content:	"",
+          //   entry_time:	""
+          // }
+        ],
+        popindex: 0,
+        homeData:{
+          // "agent_id":"",
+          // "sign_id":"",
+          // "status":"",
+          // "money":"",
+          // "name":"",
+          // "id_card":"",
+          // "bank_card":"",
+          // "availablemoney":"",
+          // "allmoney":"",
+          // "mouthmoney":"",
+          // "daymoney":"",
+          // "falg":"",
+          // "mytodayuser":"",
+          // "agentacount":"",
+          // "agentbcount":"",
+          // "agentccount":"",
+          // "myalluser":""
+        }
+      },
+      created: function(){
+        this.session = get('session');
+        this.agent_id = get('agent_id');
+        this.sign_id = get('sign_id');
+        if(!this.session){
+          goLogin();
+          return;
+        }else{
+          this.getHomedata();
+          this.getNotice();
+        }
+        this.getNowFormatDate();
+        
+      },
+      mounted: function () {
+        
+      },
+      methods: {
+        //当前日期
+        getNowFormatDate: function () {
+          var self = this;
+          var date = new Date();
+          var month = date.getMonth() + 1;
+          var strDate = date.getDate();
+          if (month >= 1 && month <= 9) {
+            month = "0" + month;
+          }
+          if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+          }
+          var currentdate = date.getFullYear() + '年' + month + '月' + strDate + "日";
+          self.curdate = currentdate;
+        },
+        //公告弹出层
+        pop: function(){
+          var self = this;
+          var btn;
+          if(self.poplist[self.popindex].redirect_url!==0){
+            btn=['去查看','关闭'];
+          }else{
+            btn='关闭';
+          }
+          layer.open({
+            shadeClose: false,
+            title: self.poplist[self.popindex].title,
+            content: self.poplist[self.popindex].content,
+            btn: btn,
+            yes: function(index){
+              if(self.poplist[self.popindex].redirect_url!==0){
+                window.location.href = self.poplist[self.popindex].redirect_url;
+              }else{
+                layer.close(index);
+              }
+            },
+            end: function(){
+              self.popindex++;
+              if(self.popindex<self.poplist.length){
+                self.pop();
+              }
+            }
+          });
+        },
+        //获取公告数据
+        getNotice: function(){
+          var self = this;
+          ajaxGet(
+            apipath + '/Api/Notice/index',
+            {
+              session: self.session,
+              agent_id: self.agent_id
+            },
+            function(res){
+              //console.log(res);
+              if (res.error === 0) {
+                self.noreadcount = res.data.noreadcount;
+                self.noticlist = res.data.noticlist;
+                self.poplist = res.data.popnoticlist; 
+                if(self.poplist.length>0){
+                  self.pop();
+                }
+                if(self.noticlist.length>1){
+                  var scroll = setInterval('autoScroll(".notice-list")', 3000);
+                }
+              }else{
+                layerMsg(res.msg);
+                if(res.msg==='登录消息已过期'){
+                  goLogin();
+                }
+              }
+            },
+            function(res){
+              console.log(res);
+            }
+          )
+        },
+        //获取首页数据
+        getHomedata: function(){
+          var self = this;
+          ajaxGet(
+            apipath + '/Api/AgentInfo/agentInfo',
+            {
+              session: self.session,
+              agent_id: self.agent_id
+            },
+            function(res){
+              //console.log(res);
+              if (res.error === 0) {
+                self.homeData = res.data;
+              }else{
+                layerMsg(res.msg);
+                if(res.msg==='登录消息已过期'){
+                  goLogin();
+                }
+              }
+            },
+            function(res){
+              console.log(res);
+            }
+          )
+        }
+      }
+    })
+  </script>
+
+</body>
+
+</html>

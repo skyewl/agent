@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="format-detection" content="email=no">
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+
+  <title>三六九互娱</title>
+
+  <script>
+    //rem
+    (function (doc, win) {
+      var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+          var clientWidth = docEl.clientWidth;
+          if (!clientWidth) return;
+          if (clientWidth >= 750) {
+            docEl.style.fontSize = '100px';
+          } else {
+            docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+          }
+        };
+
+      if (!doc.addEventListener) return;
+      win.addEventListener(resizeEvt, recalc, false);
+      doc.addEventListener('DOMContentLoaded', recalc, false);
+    })(document, window);
+  </script>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/agent.css?v=20180612">
+  <link rel="stylesheet" href="css/mobiscroll.full.min.css">
+
+</head>
+
+<body class="bgclo">
+  
+  <!--进货历史-->
+  <div class="contWrap" id="app" v-cloak>
+
+    <div class="headfix">
+      <div class="ageHead">
+        <div class="txtC icotit">
+          <span class="back" onclick="goBack()"><i class="iconfont ico-goback">&#xe607;</i> 返回</span>
+          <span>进货历史</span>
+          <a class="iconfont ico-home" href="index.html">&#xe600;</a>
+        </div>
+      </div>
+    </div>
+    <div class="topspc"></div>
+
+    <div class="historyTab">
+      <ul>
+        <li class="fl">日期</li>
+        <li class="fl">金币</li>
+        <li class="fl">价格</li>
+        <li class="fl">支付方式</li>
+      </ul>
+    </div>
+
+    <div class="historyList">
+      <ul v-if="historyList.length !==0">
+        <li class="history-item" v-for="item in historyList">
+          <span class="fl date">{{ item.entry_time }}</span>
+          <span class="fl">{{ item.money }}</span>
+          <span class="fl">¥{{ item.total_fee }}</span>
+          <span class="fl" v-if="item.pay_type ==1">微信</span>
+          <span class="fl" v-if="item.pay_type ==2">支付宝</span>
+          <span class="fl" v-if="item.pay_type ==3">银联</span>
+          <span class="fl" v-if="item.pay_type ==4">连连</span>
+        </li>
+      </ul> 
+    </div>
+    <!--加载动画-->
+    <div class="loading" v-show="showLoading">
+      <div class="sk-circle">
+        <div class="sk-circle1 sk-child"></div>
+        <div class="sk-circle2 sk-child"></div>
+        <div class="sk-circle3 sk-child"></div>
+        <div class="sk-circle4 sk-child"></div>
+        <div class="sk-circle5 sk-child"></div>
+        <div class="sk-circle6 sk-child"></div>
+        <div class="sk-circle7 sk-child"></div>
+        <div class="sk-circle8 sk-child"></div>
+        <div class="sk-circle9 sk-child"></div>
+        <div class="sk-circle10 sk-child"></div>
+        <div class="sk-circle11 sk-child"></div>
+        <div class="sk-circle12 sk-child"></div>
+      </div>
+    </div>
+    <p class="nodata">{{errmsg}}</p>
+
+  </div>
+
+
+  <script src="env_path/path.js"></script>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/layer_mobile/layer.js"></script>
+  <script src="js/mobiscroll.full.min.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/vue.min.js"></script>
+
+  <script>
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        session: '',
+        agent_id: '',
+        sign_id: '',
+        page: 1,
+        historyList:[],
+        showLoading: true,
+        errmsg:'',
+        flag: true
+      },
+      created: function(){
+        this.session = get('session');
+        this.agent_id = get('agent_id');
+        this.sign_id = get('sign_id');
+        this.getHistoryList();
+        window.addEventListener('scroll', this.handleScroll);
+      },
+      mounted: function () {
+        
+      },
+      methods: {
+        getHistoryList: function(){
+          var self = this;
+          ajaxGet(
+            apipath + '/Api/AgentBilling/BillingList',
+            {
+              session: self.session,
+              agent_id: self.agent_id,
+              p: self.page
+            },
+            function(res){
+              //console.log(res);
+              if (res.error === 0 && res.data) {
+                for (var i = 0; i < res.data.length; i++) {
+                  self.historyList.push(res.data[i]);
+                }
+                if( res.data.length===20){
+                  self.errmsg='上拉加载数据';
+                  self.flag = true;
+                }else{
+                  self.flag = false;
+                  if(self.page===1){
+                    self.errmsg='';
+                  }else{
+                    self.errmsg='暂无更多数据';
+                  }
+                }
+                
+              } else if(res.error === 0){
+                self.errmsg='暂无更多数据';
+                self.flag = false;
+              }else{
+                layerMsg(res.msg);
+                if(res.msg==='登录消息已过期'){
+                  goLogin();
+                }
+              }
+            },
+            function(res){
+              console.log(res);
+            }
+          )
+          
+        },
+        handleScroll() {
+    　　　 //判断滚动到底部
+          if ($(window).scrollTop() >=$(document).height() - $(window).height() && this.flag) {
+            this.showLoading = true;
+            this.page++;
+            this.getHistoryList();
+          }
+        }
+        
+      }
+    })
+
+
+
+
+  </script>
+
+</body>
+
+</html>

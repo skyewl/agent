@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="format-detection" content="email=no">
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+
+  <title>三六九互娱</title>
+
+  <script>
+    //rem
+    (function (doc, win) {
+      var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+          var clientWidth = docEl.clientWidth;
+          if (!clientWidth) return;
+          if (clientWidth >= 750) {
+            docEl.style.fontSize = '100px';
+          } else {
+            docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+          }
+        };
+
+      if (!doc.addEventListener) return;
+      win.addEventListener(resizeEvt, recalc, false);
+      doc.addEventListener('DOMContentLoaded', recalc, false);
+    })(document, window);
+  </script>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/agent.css?v=20180612">
+</head>
+
+<body class="bgclo">
+  <!--下级开始-->
+  <div class="contWrap" id="app" v-cloak>
+
+    <div class="headfix">
+      <div class="ageHead">
+        <div class="txtC icotit">
+          <span class="back" onclick="goBack()"><i class="iconfont ico-goback">&#xe607;</i> 返回</span>
+          <span>{{ checkJuniorTit }}</span>
+          <a class="iconfont ico-home" href="index.html">&#xe600;</a>
+        </div>
+      </div>
+    </div>
+    <div class="topspc"></div>    
+    
+    <div class="junior-queryBox clearfix">
+      <div class="searchBox">
+        <i class="iconfont ico-search">&#xe697;</i>
+        <input class="ipt" type="text" placeholder="输入代理名称或手机号" v-model="searchVal">
+      </div>
+      <button class="btn query-btn" @click="fn_search(searchVal)">查询</button>
+      <button class="btn reset-btn" onclick="location.reload()">重置</button>
+    </div>
+
+    <template v-if="nodata">
+      <p class="nodata">暂无用户</p>
+    </template>
+        
+    <template v-else>
+      <div class="junior-list">
+        <ul>
+          <li class="junior-item" v-for="item in juniorData">
+              <ul class="datalist">
+                <li class="item">
+                  <div>
+                    <p class="name">{{ item.name }}</p>
+                    <p class="lab" v-if="item.sign_id ==='2'">金牌代理</p>
+                    <p class="lab" v-else-if="item.sign_id ==='3'">银牌代理</p>
+                    <p class="lab" v-else-if="item.sign_id ==='4'">代理</p>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <p>{{ item.money }}</p>
+                    <p class="lab">金币消耗</p>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <p>{{ item.usercount }}</p>
+                    <p class="lab">邀请玩家</p>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <a class="checkDet" :href=" 'juniorDetails.html?agent_id=' + item.agent_id ">查看详情</a>
+                  </div>
+                </li>
+              </ul>
+          </li>
+        </ul>
+      </div>
+    </template>
+    <p class="nodata">{{errmsg}}</p>
+    
+    <!--加载动画-->
+    <div class="loading" v-show="showLoading">
+      <div class="sk-circle">
+        <div class="sk-circle1 sk-child"></div>
+        <div class="sk-circle2 sk-child"></div>
+        <div class="sk-circle3 sk-child"></div>
+        <div class="sk-circle4 sk-child"></div>
+        <div class="sk-circle5 sk-child"></div>
+        <div class="sk-circle6 sk-child"></div>
+        <div class="sk-circle7 sk-child"></div>
+        <div class="sk-circle8 sk-child"></div>
+        <div class="sk-circle9 sk-child"></div>
+        <div class="sk-circle10 sk-child"></div>
+        <div class="sk-circle11 sk-child"></div>
+        <div class="sk-circle12 sk-child"></div>
+      </div>
+    </div>
+
+    <div class="botspc"></div>
+  </div>
+
+
+  <script src="env_path/path.js"></script>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/layer_mobile/layer.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/vue.min.js"></script>
+
+  <script>
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        checkJuniorTit:'',
+        checkType: '',
+        session: '',
+        agent_id: '',
+        sign_id: '',
+        searchVal: '',
+        page: 1,
+        showLoading: true,
+        nodata: false,
+        errmsg: '',
+        juniorData: [],
+        flag: true
+      },
+      created: function(){
+        this.session = get('session');
+        this.agent_id = get('agent_id');
+        this.sign_id = get('sign_id');
+        if(getparam('checkType')==='notActive'){
+          this.checkJuniorTit='未激活代理';
+          this.checkType = '3';
+        }
+        if(getparam('checkType')==='frozen'){
+          this.checkJuniorTit='已冻结代理';
+          this.checkType = '5';
+        }
+      },
+      mounted: function () {
+        this.checkJunior();
+        window.addEventListener('scroll', this.handleScroll);
+      },
+      methods: {
+        checkJunior: function(){
+          var self = this;
+          ajaxGet(
+            apipath + '/Api/LowerLevel/MyFreezeList',
+            {
+              session: self.session,
+              agent_id: self.agent_id,
+              status_id: self.checkType,
+              p: self.page,
+              search: self.searchVal
+            },
+            function(res){
+              //console.log(res);
+              if(res.error === 0 && res.data){
+                self.nodata = false;
+                self.juniorData = res.data;
+                if( res.data.length===10){
+                  self.errmsg='上拉加载更多数据';
+                  self.flag = true;
+                }else{
+                  self.errmsg='';
+                  self.flag = false;
+                }
+              }else if (res.error === 0){
+                self.nodata = true;
+                self.flag = false;
+                self.errmsg='';
+              }else{
+                layerMsg( res.msg );
+                if(res.msg==='登录消息已过期'){
+                  goLogin();
+                }
+              }
+
+            },
+            function(res){
+              console.log(res);
+            }
+          )
+        },
+        fn_search: function(){
+          if(this.searchVal!==''){
+            this.checkJunior();
+          }else{
+            layerMsg('请输入查询内容！')
+          }
+        },
+        getMoreJunior: function(){
+          var self = this;
+          ajaxGet(
+            apipath + '/Api/LowerLevel/MyFreezeList',
+            {
+              session: self.session,
+              agent_id: self.agent_id,
+              status_id: self.checkType,
+              p: self.page,
+              search: self.searchVal
+            },
+            function(res){
+              //console.log(res);
+              if(res.error === 0 && res.data){
+                for (var i = 0; i < res.data.length; i++) {
+                  self.juniorData.push(res.data[i]);
+                }
+                if( res.data.length===10){
+                  self.errmsg='上拉加载更多数据';
+                }
+                self.nodata = false;
+              }else if (res.error === 0){
+                self.flag = false;
+                self.errmsg='暂无更多数据';
+              }else{
+                layerMsg( res.msg );
+                if(res.msg==='登录消息已过期'){
+                  goLogin();
+                }
+              }
+
+            },
+            function(res){
+              console.log(res);
+            }
+          )
+         
+        },
+        handleScroll: function() {
+    　　　 //判断滚动到底部
+          if ($(window).scrollTop() >=$(document).height() - $(window).height() && this.flag) {
+            this.showLoading = true;
+            this.page++;
+            this.getMoreJunior();
+          }
+        }
+      }
+    })
+  </script>
+
+</body>
+
+</html>
